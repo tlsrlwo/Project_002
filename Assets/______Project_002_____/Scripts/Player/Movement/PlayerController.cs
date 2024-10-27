@@ -21,13 +21,25 @@ public class PlayerMovement : MonoBehaviour
     private float rotationVelocity;
     private float verticalVelocity;
 
+    [Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
 
 
     // 카메라
     Camera mainCamera;
-    private Vector2 look;
+    private Vector2 look; 
+    private const float _threshold = 0.01f;
+    private float cinemachineTargetYaw;
+    private float cinemachineTargetPitch;
 
-    [Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
+    public float cameraHorizontalSpeed = 2.0f;
+    public float cameraVerticalSpeed = 2.0f;
+
+    // Camera Clamping
+    public float topClamp = 70.0f;
+    public float bottomClamp = -30.0f;
+    public GameObject cinemachineCameraTarget;
+    public float cameraAngleOverride = 0.0f;
+
 
 
     // Strafe
@@ -40,16 +52,20 @@ public class PlayerMovement : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
         mainCamera = Camera.main;
     }
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+
+        Cursor.visible = false;
+    }
 
     private void Update()
     {
         // 플레이어의 이동(PlayerController)
         Movement();
 
-        // 카메라 input값
-        float hMouse = Input.GetAxis("Mouse X");
-        float vMouse = Input.GetAxis("Mouse Y") * -1; //-1을 곱하는 이유는 상하반전을 일으킴(마우스 위아래 움직임)
-        look = new Vector2(hMouse, vMouse);
+        CameraRotation();
+      
 
         isSprint = Input.GetKey(KeyCode.LeftShift);
         if (isSprint)
@@ -143,7 +159,35 @@ public class PlayerMovement : MonoBehaviour
 
     private void CameraRotation()
     {
+        // 카메라 input값
+        float hMouse = Input.GetAxis("Mouse X");
+        float vMouse = Input.GetAxis("Mouse Y") * -1; //-1을 곱하는 이유는 상하반전을 일으킴(마우스 위아래 움직임)
+        look = new Vector2(hMouse, vMouse);
 
+        // if there is an input and camera position is not fixed
+        if (look.sqrMagnitude >= _threshold)
+        {
+            // Don't multiply mouse input by Time.deltaTime;
+            float deltaTimeMultiplier = 1.0f;
+
+            cinemachineTargetYaw += look.x * deltaTimeMultiplier * cameraHorizontalSpeed;
+            cinemachineTargetPitch += look.y * deltaTimeMultiplier * cameraVerticalSpeed;
+        }
+
+        // clamp our rotations so our values are limited 360 degrees
+        cinemachineTargetYaw = ClampAngle(cinemachineTargetYaw, float.MinValue, float.MaxValue);
+        cinemachineTargetPitch = ClampAngle(cinemachineTargetPitch, bottomClamp, topClamp);
+        
+        // Cinemachine will follow this target
+        cinemachineCameraTarget.transform.rotation = Quaternion.Euler(cinemachineTargetPitch + cameraAngleOverride, cinemachineTargetYaw, 0.0f);
     }
+
+    private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
+    {
+        if (lfAngle < -360f) lfAngle += 360f;
+        if (lfAngle > 360f) lfAngle -= 360f;
+        return Mathf.Clamp(lfAngle, lfMin, lfMax);
+    }
+
 
 }
