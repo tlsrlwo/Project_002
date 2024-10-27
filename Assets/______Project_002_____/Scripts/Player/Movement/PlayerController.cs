@@ -64,9 +64,6 @@ public class PlayerMovement : MonoBehaviour
         // 플레이어의 이동(PlayerController)
         Movement();
 
-        CameraRotation();
-      
-
         isSprint = Input.GetKey(KeyCode.LeftShift);
         if (isSprint)
         {
@@ -91,6 +88,11 @@ public class PlayerMovement : MonoBehaviour
         anim.SetFloat("vInput", move.y);
         anim.SetFloat("Strafe", isStrafe ? 1 : 0);
 
+    }
+
+    private void LateUpdate()
+    {
+        CameraRotation();
     }
 
     private void Movement()
