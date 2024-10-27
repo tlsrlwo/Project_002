@@ -9272,6 +9272,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1583768828172881108}
+  - component: {fileID: 4156878258173672202}
+  - component: {fileID: 4657079547465965337}
   m_Layer: 0
   m_Name: PicoChan
   m_TagString: Untagged
@@ -9295,6 +9297,51 @@ Transform:
   - {fileID: 5242581984151921449}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!143 &4156878258173672202
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8036427175453318537}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 1.4
+  m_Radius: 0.25
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.001
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0.7, z: 0}
+--- !u!114 &4657079547465965337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8036427175453318537}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5137206edaa0a4044a882140b79495ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  anim: {fileID: 0}
+  moveSpeed: 3
+  sprintSpeed: 5
+  speedChangeRate: 20
+  hInput: 0
+  vInput: 0
+  rotationSmoothTime: 0.12
 --- !u!1 &8126780858351605165
 GameObject:
   m_ObjectHideFlags: 0
@@ -10402,10 +10449,10 @@ Animator:
   m_GameObject: {fileID: 9132110847455367333}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 10038fdbf93c4dd43af9ce774d03a956, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 6d96e452bebfb7049986023d8bd357a7, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_WarningMessage: 
