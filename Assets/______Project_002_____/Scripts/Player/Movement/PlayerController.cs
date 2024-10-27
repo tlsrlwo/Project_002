@@ -1,6 +1,8 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
 
     // 이동
@@ -40,11 +42,16 @@ public class PlayerMovement : MonoBehaviour
     public GameObject cinemachineCameraTarget;
     public float cameraAngleOverride = 0.0f;
 
-
-
     // Strafe
     private bool isStrafe;
 
+    // Animation
+    public int comboCount = 0;
+
+    // StateBase
+
+    public AttackingBaseState previousState;
+    public AttackingBaseState currentState;
 
     private void Awake()
     {
@@ -61,6 +68,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        // 플레이어 이동 input값
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+        move = new Vector2(horizontal, vertical);
+
         // 플레이어의 이동(PlayerController)
         Movement();
 
@@ -83,6 +95,22 @@ public class PlayerMovement : MonoBehaviour
             transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
         }
 
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            //공격
+            if (comboCount == 0)
+            {
+                anim.SetTrigger("Sword_Attack");
+                comboCount++;                
+            }
+       /*     else
+            {
+                comboCount++;
+                anim.SetInteger("ComboCount", comboCount);
+            }*/
+
+        }
+
         anim.SetFloat("Speed", animationBlend);
         anim.SetFloat("hInput", move.x);
         anim.SetFloat("vInput", move.y);
@@ -96,11 +124,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void Movement()
-    {
-        // 플레이어 이동 input값
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-        move = new Vector2(horizontal, vertical);
+    {       
 
         // isSprint에 따라 스피드 변화
         float targetSpeed = isSprint ? sprintSpeed : moveSpeed;
