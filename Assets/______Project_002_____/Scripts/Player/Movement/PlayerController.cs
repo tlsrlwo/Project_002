@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private float targetRotation = 0.0f;
     private float rotationVelocity;
     private float verticalVelocity;
+    private float terminalVelocity = 53.0f;
 
     [Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
 
@@ -48,8 +49,25 @@ public class PlayerController : MonoBehaviour
     // Animation
     public int comboCount = 0;
 
-    // StateBase
+    // Jump & Gravity    
+    [Header("Jump Gravity")]
+    private bool isGrounded;
+    public float GroundedOffset = -0.14f;
+    public float GroundedRadius = 0.28f;
+    public LayerMask GroundLayers;
+    public float Gravity = -15.0f;
+    public float JumpHeight = 1.2f;
 
+    public float JumpTimeout = 0.50f;       //Time required to pass before being able to jump again. Set to 0f to instantly jump again        
+    public float FallTimeout = 0.15f;       //Time required to pass before entering the fall state. Useful for walking down stairs
+
+    private float _jumpTimeoutDelta;
+    private float _fallTimeoutDelta;
+
+    private bool isJump = false;
+    
+
+    // StateBase
     public AttackingBaseState previousState;
     public AttackingBaseState currentState;
 
@@ -64,6 +82,10 @@ public class PlayerController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         Cursor.visible = false;
+
+        // reset our timeouts on start
+        _jumpTimeoutDelta = JumpTimeout;
+        _fallTimeoutDelta = FallTimeout;
     }
 
     private void Update()
@@ -74,7 +96,10 @@ public class PlayerController : MonoBehaviour
         move = new Vector2(horizontal, vertical);
 
         // 플레이어의 이동(PlayerController)
+        JumpAndGravity();
+        GroundCheck();
         Movement();
+        
 
         isSprint = Input.GetKey(KeyCode.LeftShift);
         if (isSprint)
@@ -102,20 +127,14 @@ public class PlayerController : MonoBehaviour
             {
                 anim.SetTrigger("Sword_Attack");
                 comboCount++;                
-            }
-       /*     else
-            {
-                comboCount++;
-                anim.SetInteger("ComboCount", comboCount);
-            }*/
-
+            }    
         }
 
         anim.SetFloat("Speed", animationBlend);
         anim.SetFloat("hInput", move.x);
         anim.SetFloat("vInput", move.y);
-        anim.SetFloat("Strafe", isStrafe ? 1 : 0);
-
+        anim.SetFloat("Strafe", isStrafe ? 1 : 0);        
+        anim.SetBool("Grounded", isGrounded);      
     }
 
     private void LateUpdate()
@@ -182,6 +201,67 @@ public class PlayerController : MonoBehaviour
                          new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
 
     }
+    private void JumpAndGravity()
+    {
+        isJump = Input.GetKeyDown(KeyCode.Space);
+
+        if (isGrounded)
+        {
+            // reset the fall timeout timer
+            _fallTimeoutDelta = FallTimeout;
+
+            // 애니메이션
+            
+            anim.SetBool("Jump", false);
+            anim.SetBool("Falling", false);
+
+
+            // stop our velocity dropping infinitely when grounded
+            if (verticalVelocity < 0.0f)
+            {
+                verticalVelocity = -2f;
+            }
+
+            // Jump
+            if (isJump && _jumpTimeoutDelta <= 0.0f)
+            {                
+                verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+                                
+                anim.SetBool("Jump", true);
+            }
+
+            // jump timeout
+            if (_jumpTimeoutDelta >= 0.0f)
+            {
+                _jumpTimeoutDelta -= Time.deltaTime;
+            }
+        }
+        else
+        {   
+            // reset the jump timeout timer
+            _jumpTimeoutDelta = JumpTimeout;
+
+            // fall timeout
+            if (_fallTimeoutDelta >= 0.0f)
+            {
+                _fallTimeoutDelta -= Time.deltaTime;
+            }
+            else
+            {                
+                anim.SetBool("Falling", true);
+                anim.SetBool("Grounded", true);
+            }
+
+            // if we are not grounded, do not jump
+            //isJump = false;
+        }
+
+        // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
+        if (verticalVelocity < terminalVelocity)
+        {
+            verticalVelocity += Gravity * Time.deltaTime;
+        }
+    }
 
     private void CameraRotation()
     {
@@ -215,5 +295,28 @@ public class PlayerController : MonoBehaviour
         return Mathf.Clamp(lfAngle, lfMin, lfMax);
     }
 
+    private void GroundCheck()
+    {
+        // 플레이어 발바닥 위치
+        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
+
+        isGrounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers);  //QueryTriggerInteraction.Ignore        
+    }
+
+
+
+    private void OnGUI()
+    {
+        float rectPos = 50;
+        GUI.Label(new Rect(20, rectPos, 400, 100), "isGrounded: " + isGrounded);
+        rectPos += 30f;
+    }
+    private void OnDrawGizmosSelected()
+    {
+        Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
+        Gizmos.color = transparentGreen;
+                
+        Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
+    }
 
 }
