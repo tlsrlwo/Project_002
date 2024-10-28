@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
     public float sprintSpeed = 5.0f;
     public float speedChangeRate = 10.0f;
 
-    public float hInput, vInput;
+    private float hInput, vInput;
     private bool isSprint = false;
     private Vector2 move;
     private float speed;
@@ -34,12 +34,12 @@ public class PlayerController : MonoBehaviour
     private float cinemachineTargetYaw;
     private float cinemachineTargetPitch;
 
-    public float cameraHorizontalSpeed = 2.0f;
-    public float cameraVerticalSpeed = 2.0f;
+    private float cameraHorizontalSpeed = 2.0f;
+    private float cameraVerticalSpeed = 2.0f;
 
     // Camera Clamping
-    public float topClamp = 70.0f;
-    public float bottomClamp = -30.0f;
+    private float topClamp = 70.0f;
+    private float bottomClamp = -30.0f;
     public GameObject cinemachineCameraTarget;
     public float cameraAngleOverride = 0.0f;
 
@@ -58,8 +58,8 @@ public class PlayerController : MonoBehaviour
     public float Gravity = -15.0f;
     public float JumpHeight = 1.2f;
 
-    public float JumpTimeout = 0.50f;       //Time required to pass before being able to jump again. Set to 0f to instantly jump again        
-    public float FallTimeout = 0.15f;       //Time required to pass before entering the fall state. Useful for walking down stairs
+    private float JumpTimeout = 0.50f;       //Time required to pass before being able to jump again. Set to 0f to instantly jump again        
+    private float FallTimeout = 0.15f;       //Time required to pass before entering the fall state. Useful for walking down stairs
 
     private float _jumpTimeoutDelta;
     private float _fallTimeoutDelta;
@@ -68,8 +68,8 @@ public class PlayerController : MonoBehaviour
     
 
     // StateBase
-    public AttackingBaseState previousState;
-    public AttackingBaseState currentState;
+    //public AttackingBaseState previousState;
+    //public AttackingBaseState currentState;
 
     private void Awake()
     {
