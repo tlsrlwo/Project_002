@@ -1,20 +1,48 @@
+using RPGCharacterAnims.Lookups;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    #region References
+    CharacterController controller;
+    Camera mainCamera;
+    [HideInInspector] public Animator anim;    
 
     // 이동
     [Header("Movement")]
-    CharacterController controller;
-    [HideInInspector] public Animator anim;
-
     public float moveSpeed = 3.0f;
     public float sprintSpeed = 5.0f;
-    public float speedChangeRate = 10.0f;
+    public float speedChangeRate = 10.0f;        
+    [Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
 
-    private float hInput, vInput;
+    // 카메라
+    [Header("Camera")]    
+    public float cameraAngleOverride = 0.0f;
+    public GameObject cinemachineCameraTarget;
+
+    // Animation
+    [Header("Animation Related")]
+    public int comboCount = 0;
+    public int characterState = 0;
+    
+    // Jump & Gravity    
+    [Header("Jump Gravity")]
+    public float GroundedOffset = -0.14f;
+    public float GroundedRadius = 0.28f;
+    public LayerMask GroundLayers;
+    public float Gravity = -15.0f;
+    public float JumpHeight = 1.2f;
+
+    [Header("Weapon")]
+    public GameObject weapon1;
+
+    // Strafe
+    private bool isStrafe;
+
+    // Player Movement
     private bool isSprint = false;
     private Vector2 move;
     private float speed;
@@ -24,69 +52,46 @@ public class PlayerController : MonoBehaviour
     private float verticalVelocity;
     private float terminalVelocity = 53.0f;
 
-    [Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
-
-
-    // 카메라
-    Camera mainCamera;
-    private Vector2 look; 
+    // Camera
+    private Vector2 look;
     private const float _threshold = 0.01f;
     private float cinemachineTargetYaw;
     private float cinemachineTargetPitch;
-
     private float cameraHorizontalSpeed = 2.0f;
     private float cameraVerticalSpeed = 2.0f;
-
     // Camera Clamping
     private float topClamp = 70.0f;
     private float bottomClamp = -30.0f;
-    public GameObject cinemachineCameraTarget;
-    public float cameraAngleOverride = 0.0f;
 
-    // Strafe
-    private bool isStrafe;
-
-    // Animation
-    public int comboCount = 0;
-
-    // Jump & Gravity    
-    [Header("Jump Gravity")]
+    //Gravity
     private bool isGrounded;
-    public float GroundedOffset = -0.14f;
-    public float GroundedRadius = 0.28f;
-    public LayerMask GroundLayers;
-    public float Gravity = -15.0f;
-    public float JumpHeight = 1.2f;
-
     private float JumpTimeout = 0.50f;       //Time required to pass before being able to jump again. Set to 0f to instantly jump again        
     private float FallTimeout = 0.15f;       //Time required to pass before entering the fall state. Useful for walking down stairs
-
     private float _jumpTimeoutDelta;
     private float _fallTimeoutDelta;
-
     private bool isJump = false;
+
     
 
-    // StateBase
-    //public AttackingBaseState previousState;
-    //public AttackingBaseState currentState;
-
+    #endregion
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
         anim = GetComponentInChildren<Animator>();
-        mainCamera = Camera.main;
+        mainCamera = Camera.main;        
     }
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
 
-        Cursor.visible = false;
+        Cursor.visible = false;        
 
         // reset our timeouts on start
         _jumpTimeoutDelta = JumpTimeout;
         _fallTimeoutDelta = FallTimeout;
     }
+
+
 
     private void Update()
     {
@@ -99,35 +104,22 @@ public class PlayerController : MonoBehaviour
         JumpAndGravity();
         GroundCheck();
         Movement();
-        
+        ChangeState();
 
-        isSprint = Input.GetKey(KeyCode.LeftShift);
-        if (isSprint)
+        if (characterState == 1)
         {
-            anim.SetFloat("MotionSpeed", 1.2f);
-        }
-        else
-        {
-            anim.SetFloat("MotionSpeed", 1f);
-        }
+            weapon1.SetActive(true);
 
-        isStrafe = Input.GetKey(KeyCode.Mouse1);
-
-        if (isStrafe)
-        {
-            Vector3 cameraForward = Camera.main.transform.forward.normalized;
-            cameraForward.y = 0;
-            transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
-        }
-
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
             //공격
-            if (comboCount == 0)
+            if (comboCount == 0 && Input.GetKeyDown(KeyCode.Mouse0))
             {
                 anim.SetTrigger("Sword_Attack");
                 comboCount++;                
             }    
+        }
+        else
+        {
+            weapon1.SetActive(false);
         }
 
         anim.SetFloat("Speed", animationBlend);
@@ -199,6 +191,24 @@ public class PlayerController : MonoBehaviour
         // Controller 이동
         controller.Move(targetDirection.normalized * (speed * Time.deltaTime) +
                          new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+
+        isSprint = Input.GetKey(KeyCode.LeftShift);
+        if (isSprint)
+        {
+            anim.SetFloat("MotionSpeed", 1.2f);
+        }
+        else
+        {
+            anim.SetFloat("MotionSpeed", 1f);
+        }
+        isStrafe = Input.GetKey(KeyCode.Mouse1);
+
+        if (isStrafe)
+        {
+            Vector3 cameraForward = Camera.main.transform.forward.normalized;
+            cameraForward.y = 0;
+            transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
+        }
 
     }
     private void JumpAndGravity()
@@ -303,14 +313,24 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers);  //QueryTriggerInteraction.Ignore        
     }
 
-
-
-    private void OnGUI()
+ 
+  private void ChangeState()
     {
-        float rectPos = 50;
-        GUI.Label(new Rect(20, rectPos, 400, 100), "isGrounded: " + isGrounded);
-        rectPos += 30f;
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            characterState = 1;
+        }
+        if(Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            characterState = 0;
+        }
+
     }
+
+    
+
+
+
     private void OnDrawGizmosSelected()
     {
         Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
