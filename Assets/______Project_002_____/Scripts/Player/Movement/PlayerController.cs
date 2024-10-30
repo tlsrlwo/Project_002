@@ -3,9 +3,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 public class PlayerController : MonoBehaviour
 {
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(aimTarget.position, 0.1f);
+    }
+
     #region References
     CharacterController controller;
     Camera mainCamera;
@@ -38,6 +46,18 @@ public class PlayerController : MonoBehaviour
 
     [Header("Weapon")]
     public GameObject weapon1;
+
+    [Header("Weapon FOV")]
+    public float defaultFOV;
+    public float aimFOV;
+
+    [Header("Weapon Aiming")]
+    public Transform aimTarget;
+    public LayerMask aimingLayer;
+    public float aimingIKBlendTarget;
+    public float aimingIKBlendCurrent;
+    public Rig aimingRig;
+    public Rig bodyAimRig;
 
     // Strafe
     private bool isStrafe;
@@ -73,6 +93,7 @@ public class PlayerController : MonoBehaviour
 
     
 
+
     #endregion
     private void Awake()
     {
@@ -89,7 +110,9 @@ public class PlayerController : MonoBehaviour
         // reset our timeouts on start
         _jumpTimeoutDelta = JumpTimeout;
         _fallTimeoutDelta = FallTimeout;
-    }
+
+       
+}
 
 
 
@@ -105,6 +128,7 @@ public class PlayerController : MonoBehaviour
         GroundCheck();
         Movement();
         ChangeState();
+        WeaponAiming();
 
         if (characterState == 1)
         {
@@ -121,6 +145,7 @@ public class PlayerController : MonoBehaviour
         {
             weapon1.SetActive(false);
         }
+
 
         anim.SetFloat("Speed", animationBlend);
         anim.SetFloat("hInput", move.x);
@@ -313,30 +338,67 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers);  //QueryTriggerInteraction.Ignore        
     }
 
- 
-  private void ChangeState()
+    private void ChangeState()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             characterState = 1;
         }
-        if(Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             characterState = 0;
         }
 
     }
 
-    
+    private void WeaponAiming()
+    {
+        if (Input.GetKeyDown(KeyCode.Mouse1)) //mouse right duplicated with strafe
+        {
+            //zoom in
+            CameraManager.Instance.TargetFOV = aimFOV;
+            aimingIKBlendTarget = 1;
+        }
+        if (Input.GetKeyUp(KeyCode.Mouse1))
+        {
+            //zoom out
+            CameraManager.Instance.TargetFOV = defaultFOV;
+            aimingIKBlendTarget = 0;
+        }
+
+         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        
+        Vector3 aimingTargetPosition = Camera.main.transform.position + Camera.main.transform.forward * 1000f;
+
+        // Raycast 가 성공하면 aimingTargetPosition 을 Raycast가 성공한 지점으로 설정
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, 1000f, aimingLayer))
+        {
+            if (hitInfo.transform.root != transform) 
+            {
+                aimingTargetPosition = hitInfo.point;
+            }
+        }
+        else // Raycasat 가 실패하면 카메라의 정면으로 1000 m 떨어진 지점을 설정
+        {
+
+        }
+
+        // aimingTargetPosition을 aimTarget의 위치로 설정
+        aimTarget.position = aimingTargetPosition;
+
+        aimingIKBlendCurrent = Mathf.Lerp(aimingIKBlendCurrent, aimingIKBlendTarget, Time.deltaTime * 10f);
+        aimingRig.weight = aimingIKBlendCurrent;       
+        bodyAimRig.weight = aimingIKBlendCurrent;
+        
+    }
 
 
-
-    /*private void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected()
     {
         Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
         Gizmos.color = transparentGreen;
                 
         Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
-    }*/
+    }
 
 }
