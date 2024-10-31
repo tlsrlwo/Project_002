@@ -59,6 +59,10 @@ public class PlayerController : MonoBehaviour
     public Rig aimingRig;
     public Rig bodyAimRig;
 
+    [Header("Canavs")]
+    public Canvas aimCanvas;
+
+
     // Strafe
     private bool isStrafe;
 
@@ -105,14 +109,14 @@ public class PlayerController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
 
-        Cursor.visible = false;        
+        Cursor.visible = false;
 
         // reset our timeouts on start
         _jumpTimeoutDelta = JumpTimeout;
         _fallTimeoutDelta = FallTimeout;
 
-       
-}
+
+    }
 
 
 
@@ -358,12 +362,14 @@ public class PlayerController : MonoBehaviour
             //zoom in
             CameraManager.Instance.TargetFOV = aimFOV;
             aimingIKBlendTarget = 1;
+            aimCanvas.gameObject.SetActive(true);
         }
         if (Input.GetKeyUp(KeyCode.Mouse1))
         {
             //zoom out
             CameraManager.Instance.TargetFOV = defaultFOV;
             aimingIKBlendTarget = 0;
+            aimCanvas.gameObject.SetActive(false);
         }
 
          Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
