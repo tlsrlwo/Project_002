@@ -101,16 +101,17 @@ namespace Project002
 
 
         #endregion
+
         private void Awake()
         {
+            // 컴포넌트
             controller = GetComponent<CharacterController>();
             anim = GetComponentInChildren<Animator>();
             mainCamera = Camera.main;
 
+            // 무기
             var weaponGameObject = TransformUtility.FindGameObjectWithTag(gunWeapon, "Weapon");
             currentWeapon = weaponGameObject.GetComponent<Weapon>();
-
-
         }
         private void Start()
         {
@@ -121,10 +122,7 @@ namespace Project002
             // reset our timeouts on start
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
-
-
         }
-
 
 
         private void Update()
@@ -133,8 +131,13 @@ namespace Project002
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
             move = new Vector2(horizontal, vertical);
-            // strafe
-            isStrafe = Input.GetKey(KeyCode.Mouse1);      
+            
+          
+            anim.SetFloat("Speed", animationBlend);
+            anim.SetFloat("hInput", move.x);
+            anim.SetFloat("vInput", move.y);
+            anim.SetFloat("Strafe", isStrafe ? 1 : 0);
+            anim.SetBool("Grounded", isGrounded);
 
             // 각종 함수 실행
             JumpAndGravity();
@@ -142,29 +145,7 @@ namespace Project002
             Movement();
             ChangeState();
             WeaponAiming();
-            
-
-            /* if (characterState == 1)
-             {
-                 weapon1.SetActive(true);
-
-                 //공격
-                 if (comboCount == 0 && Input.GetKeyDown(KeyCode.Mouse0))
-                 {
-                     anim.SetTrigger("Sword_Attack");
-                     comboCount++;                
-                 }    
-             }
-             else
-             {
-                 weapon1.SetActive(false);
-             }*/
-
-            anim.SetFloat("Speed", animationBlend);
-            anim.SetFloat("hInput", move.x);
-            anim.SetFloat("vInput", move.y);
-            anim.SetFloat("Strafe", isStrafe ? 1 : 0);
-            anim.SetBool("Grounded", isGrounded);
+      
         }
 
         private void LateUpdate()
@@ -358,7 +339,16 @@ namespace Project002
 
         private void WeaponAiming()
         {
-            if (Input.GetKeyDown(KeyCode.Mouse1)) //mouse right duplicated with strafe
+            // strafe
+            isStrafe = Input.GetKey(KeyCode.Mouse1);
+            if (isStrafe)
+            {
+                Vector3 cameraForward = Camera.main.transform.forward.normalized;
+                cameraForward.y = 0;
+                transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
+            }
+
+            if (Input.GetKeyDown(KeyCode.Mouse1))        // mouse right duplicated with strafe
             {
                 //zoom in
                 CameraManager.Instance.TargetFOV = aimFOV;
@@ -371,13 +361,7 @@ namespace Project002
                 CameraManager.Instance.TargetFOV = defaultFOV;
                 aimingIKBlendTarget = 0;
                 aimCanvas.gameObject.SetActive(false);                
-            }
-            if (isStrafe)
-            {
-                Vector3 cameraForward = Camera.main.transform.forward.normalized;
-                cameraForward.y = 0;
-                transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
-            }
+            }           
 
             Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
@@ -390,11 +374,7 @@ namespace Project002
                 {
                     aimingTargetPosition = hitInfo.point;
                 }
-            }
-            else // Raycasat 가 실패하면 카메라의 정면으로 1000 m 떨어진 지점을 설정
-            {
-
-            }
+            }         
 
             // aimingTargetPosition을 aimTarget의 위치로 설정
             aimTarget.position = aimingTargetPosition;
@@ -404,7 +384,6 @@ namespace Project002
             bodyAimRig.weight = aimingIKBlendCurrent;
 
             WeaponShooting();
-
         }
 
         private void WeaponShooting()
@@ -416,8 +395,7 @@ namespace Project002
             else
             {
                 currentWeapon.isFiring = false;
-            }
-            
+            }            
         }
         
         private void OnDrawGizmosSelected()

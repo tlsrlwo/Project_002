@@ -9,7 +9,7 @@ namespace Project002
         Ray ray;
         RaycastHit hitInfo;
         Camera mainCamera;
-        private float range = 100f;
+        private float range = 1000f;
         public LayerMask aimingLayer;
 
         private void Start()
