@@ -142,7 +142,7 @@ namespace Project002
             Movement();
             ChangeState();
             WeaponAiming();
-            WeaponShooting();
+            
 
             /* if (characterState == 1)
              {
@@ -403,6 +403,8 @@ namespace Project002
             aimingRig.weight = aimingIKBlendCurrent;
             bodyAimRig.weight = aimingIKBlendCurrent;
 
+            WeaponShooting();
+
         }
 
         private void WeaponShooting()
@@ -417,7 +419,7 @@ namespace Project002
             }
             
         }
-
+        
         private void OnDrawGizmosSelected()
         {
             Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
