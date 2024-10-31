@@ -1,410 +1,430 @@
-using RPGCharacterAnims.Lookups;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-public class PlayerController : MonoBehaviour
+
+namespace Project002
 {
-
-    private void OnDrawGizmos()
+    public class PlayerController : MonoBehaviour
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(aimTarget.position, 0.1f);
-    }
 
-    #region References
-    CharacterController controller;
-    Camera mainCamera;
-    [HideInInspector] public Animator anim;    
-
-    // 이동
-    [Header("Movement")]
-    public float moveSpeed = 3.0f;
-    public float sprintSpeed = 5.0f;
-    public float speedChangeRate = 10.0f;        
-    [Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
-
-    // 카메라
-    [Header("Camera")]    
-    public float cameraAngleOverride = 0.0f;
-    public GameObject cinemachineCameraTarget;
-
-    // Animation
-    [Header("Animation Related")]
-    public int comboCount = 0;
-    public int characterState = 0;
-    
-    // Jump & Gravity    
-    [Header("Jump Gravity")]
-    public float GroundedOffset = -0.14f;
-    public float GroundedRadius = 0.28f;
-    public LayerMask GroundLayers;
-    public float Gravity = -15.0f;
-    public float JumpHeight = 1.2f;
-
-    [Header("Weapon")]
-    public GameObject weapon1;
-
-    [Header("Weapon FOV")]
-    public float defaultFOV;
-    public float aimFOV;
-
-    [Header("Weapon Aiming")]
-    public Transform aimTarget;
-    public LayerMask aimingLayer;
-    public float aimingIKBlendTarget;
-    public float aimingIKBlendCurrent;
-    public Rig aimingRig;
-    public Rig bodyAimRig;
-
-    [Header("Canavs")]
-    public Canvas aimCanvas;
-
-
-    // Strafe
-    private bool isStrafe;
-
-    // Player Movement
-    private bool isSprint = false;
-    private Vector2 move;
-    private float speed;
-    private float animationBlend;
-    private float targetRotation = 0.0f;
-    private float rotationVelocity;
-    private float verticalVelocity;
-    private float terminalVelocity = 53.0f;
-
-    // Camera
-    private Vector2 look;
-    private const float _threshold = 0.01f;
-    private float cinemachineTargetYaw;
-    private float cinemachineTargetPitch;
-    private float cameraHorizontalSpeed = 2.0f;
-    private float cameraVerticalSpeed = 2.0f;
-    // Camera Clamping
-    private float topClamp = 70.0f;
-    private float bottomClamp = -30.0f;
-
-    //Gravity
-    private bool isGrounded;
-    private float JumpTimeout = 0.50f;       //Time required to pass before being able to jump again. Set to 0f to instantly jump again        
-    private float FallTimeout = 0.15f;       //Time required to pass before entering the fall state. Useful for walking down stairs
-    private float _jumpTimeoutDelta;
-    private float _fallTimeoutDelta;
-    private bool isJump = false;
-
-    
-
-
-    #endregion
-    private void Awake()
-    {
-        controller = GetComponent<CharacterController>();
-        anim = GetComponentInChildren<Animator>();
-        mainCamera = Camera.main;        
-    }
-    private void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-
-        Cursor.visible = false;
-
-        // reset our timeouts on start
-        _jumpTimeoutDelta = JumpTimeout;
-        _fallTimeoutDelta = FallTimeout;
-
-
-    }
-
-
-
-    private void Update()
-    {
-        // 플레이어 이동 input값
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-        move = new Vector2(horizontal, vertical);
-
-        // 플레이어의 이동(PlayerController)
-        JumpAndGravity();
-        GroundCheck();
-        Movement();
-        ChangeState();
-        WeaponAiming();
-
-        if (characterState == 1)
+        private void OnDrawGizmos()
         {
-            weapon1.SetActive(true);
-
-            //공격
-            if (comboCount == 0 && Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                anim.SetTrigger("Sword_Attack");
-                comboCount++;                
-            }    
-        }
-        else
-        {
-            weapon1.SetActive(false);
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(aimTarget.position, 0.1f);
         }
 
+        #region References
+        CharacterController controller;
+        Camera mainCamera;
+        [HideInInspector] public Animator anim;
 
-        anim.SetFloat("Speed", animationBlend);
-        anim.SetFloat("hInput", move.x);
-        anim.SetFloat("vInput", move.y);
-        anim.SetFloat("Strafe", isStrafe ? 1 : 0);        
-        anim.SetBool("Grounded", isGrounded);      
-    }
+        // 이동
+        [Header("Movement")]
+        public float moveSpeed = 3.0f;
+        public float sprintSpeed = 5.0f;
+        public float speedChangeRate = 10.0f;
+        [Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
 
-    private void LateUpdate()
-    {
-        CameraRotation();
-    }
+        // 카메라
+        [Header("Camera")]
+        public float cameraAngleOverride = 0.0f;
+        public GameObject cinemachineCameraTarget;
 
-    private void Movement()
-    {       
+        // Animation
+        [Header("Animation Related")]
+        public int comboCount = 0;
+        public int characterState = 0;
 
-        // isSprint에 따라 스피드 변화
-        float targetSpeed = isSprint ? sprintSpeed : moveSpeed;
+        // Jump & Gravity    
+        [Header("Jump Gravity")]
+        public float GroundedOffset = -0.14f;
+        public float GroundedRadius = 0.28f;
+        public LayerMask GroundLayers;
+        public float Gravity = -15.0f;
+        public float JumpHeight = 1.2f;
 
-        // 인풋값이 없으면 targetSpeed를 0으로 설정
-        if (move == Vector2.zero) targetSpeed = 0.0f;
+        [Header("Weapon")]
+        public GameObject gunWeapon;
 
-        // 플레이어의 수평 이동속도값 (점프가 수직)
-        float currentHorizontalSpeed = new Vector3(controller.velocity.x, 0.0f, controller.velocity.z).magnitude;
+        [Header("Weapon FOV")]
+        public float defaultFOV;
+        public float aimFOV;
 
-        float speedOffset = 0.1f;
-        float inputMagnitude = move.magnitude;
+        [Header("Weapon Aiming")]
+        public Transform aimTarget;
+        public LayerMask aimingLayer;
+        public float aimingIKBlendTarget;
+        public float aimingIKBlendCurrent;
+        public Rig aimingRig;
+        public Rig bodyAimRig;
 
-        // targetSpeed값에 맞춰 감속과 가속 ( 자연스러운 속도 변화를 위한 )
-        if (currentHorizontalSpeed < targetSpeed - speedOffset ||
-            currentHorizontalSpeed > targetSpeed + speedOffset)
+        [Header("Canavs")]
+        public Canvas aimCanvas;
+
+        // Strafe
+        private bool isStrafe;
+
+        // Player Movement
+        private bool isSprint = false;
+        private Vector2 move;
+        private float speed;
+        private float animationBlend;
+        private float targetRotation = 0.0f;
+        private float rotationVelocity;
+        private float verticalVelocity;
+        private float terminalVelocity = 53.0f;
+
+        // Camera
+        private Vector2 look;
+        private const float _threshold = 0.01f;
+        private float cinemachineTargetYaw;
+        private float cinemachineTargetPitch;
+        private float cameraHorizontalSpeed = 2.0f;
+        private float cameraVerticalSpeed = 2.0f;
+        // Camera Clamping
+        private float topClamp = 70.0f;
+        private float bottomClamp = -30.0f;
+
+        //Gravity
+        private bool isGrounded;
+        private float JumpTimeout = 0.50f;       //Time required to pass before being able to jump again. Set to 0f to instantly jump again        
+        private float FallTimeout = 0.15f;       //Time required to pass before entering the fall state. Useful for walking down stairs
+        private float _jumpTimeoutDelta;
+        private float _fallTimeoutDelta;
+        private bool isJump = false;
+
+        // Weapon
+        private Weapon currentWeapon;
+
+
+        #endregion
+        private void Awake()
         {
-            // 선형적인 결과보다는 곡선적인 결과를 생성하여 더 유기적인 속도 변화를 제공합니다.               
-            speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * speedChangeRate);
+            controller = GetComponent<CharacterController>();
+            anim = GetComponentInChildren<Animator>();
+            mainCamera = Camera.main;
 
-            // 속도를 소숫점 3자리까지 반올림
-            speed = Mathf.Round(speed * 1000f) / 1000f;
+            var weaponGameObject = TransformUtility.FindGameObjectWithTag(gunWeapon, "Weapon");
+            currentWeapon = weaponGameObject.GetComponent<Weapon>();
+
+
         }
-        else
+        private void Start()
         {
-            speed = targetSpeed;
-        }
+            Cursor.lockState = CursorLockMode.Locked;
 
+            Cursor.visible = false;
 
-        animationBlend = Mathf.Lerp(animationBlend, targetSpeed, Time.deltaTime * speedChangeRate);
-        if (animationBlend < 0.01f) animationBlend = 0f;
-
-        // normalise input direction
-        Vector3 inputDirection = new Vector3(move.x, 0.0f, move.y).normalized;
-
-        if (move != Vector2.zero)
-        {
-            targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
-                              mainCamera.transform.eulerAngles.y;
-            float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
-                rotationSmoothTime);
-
-            if (!isStrafe)
-            {
-                // rotate to face input direction relative to camera position
-                transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
-            }
-        }
-
-
-        Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
-
-        // Controller 이동
-        controller.Move(targetDirection.normalized * (speed * Time.deltaTime) +
-                         new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
-
-        isSprint = Input.GetKey(KeyCode.LeftShift);
-        if (isSprint)
-        {
-            anim.SetFloat("MotionSpeed", 1.2f);
-        }
-        else
-        {
-            anim.SetFloat("MotionSpeed", 1f);
-        }
-        isStrafe = Input.GetKey(KeyCode.Mouse1);
-
-        if (isStrafe)
-        {
-            Vector3 cameraForward = Camera.main.transform.forward.normalized;
-            cameraForward.y = 0;
-            transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
-        }
-
-    }
-    private void JumpAndGravity()
-    {
-        isJump = Input.GetKeyDown(KeyCode.Space);
-
-        if (isGrounded)
-        {
-            // reset the fall timeout timer
+            // reset our timeouts on start
+            _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
 
-            // 애니메이션
-            
-            anim.SetBool("Jump", false);
-            anim.SetBool("Falling", false);
 
-
-            // stop our velocity dropping infinitely when grounded
-            if (verticalVelocity < 0.0f)
-            {
-                verticalVelocity = -2f;
-            }
-
-            // Jump
-            if (isJump && _jumpTimeoutDelta <= 0.0f)
-            {                
-                verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-                                
-                anim.SetBool("Jump", true);
-            }
-
-            // jump timeout
-            if (_jumpTimeoutDelta >= 0.0f)
-            {
-                _jumpTimeoutDelta -= Time.deltaTime;
-            }
         }
-        else
-        {   
-            // reset the jump timeout timer
-            _jumpTimeoutDelta = JumpTimeout;
 
-            // fall timeout
-            if (_fallTimeoutDelta >= 0.0f)
+
+
+        private void Update()
+        {
+            // 플레이어 이동 input값
+            float horizontal = Input.GetAxis("Horizontal");
+            float vertical = Input.GetAxis("Vertical");
+            move = new Vector2(horizontal, vertical);
+            // strafe
+            isStrafe = Input.GetKey(KeyCode.Mouse1);      
+
+            // 각종 함수 실행
+            JumpAndGravity();
+            GroundCheck();
+            Movement();
+            ChangeState();
+            WeaponAiming();
+            WeaponShooting();
+
+            /* if (characterState == 1)
+             {
+                 weapon1.SetActive(true);
+
+                 //공격
+                 if (comboCount == 0 && Input.GetKeyDown(KeyCode.Mouse0))
+                 {
+                     anim.SetTrigger("Sword_Attack");
+                     comboCount++;                
+                 }    
+             }
+             else
+             {
+                 weapon1.SetActive(false);
+             }*/
+
+            anim.SetFloat("Speed", animationBlend);
+            anim.SetFloat("hInput", move.x);
+            anim.SetFloat("vInput", move.y);
+            anim.SetFloat("Strafe", isStrafe ? 1 : 0);
+            anim.SetBool("Grounded", isGrounded);
+        }
+
+        private void LateUpdate()
+        {
+            CameraRotation();
+        }
+
+        private void Movement()
+        {
+
+            // isSprint에 따라 스피드 변화
+            float targetSpeed = isSprint ? sprintSpeed : moveSpeed;
+
+            // 인풋값이 없으면 targetSpeed를 0으로 설정
+            if (move == Vector2.zero) targetSpeed = 0.0f;
+
+            // 플레이어의 수평 이동속도값 (점프가 수직)
+            float currentHorizontalSpeed = new Vector3(controller.velocity.x, 0.0f, controller.velocity.z).magnitude;
+
+            float speedOffset = 0.1f;
+            float inputMagnitude = move.magnitude;
+
+            // targetSpeed값에 맞춰 감속과 가속 ( 자연스러운 속도 변화를 위한 )
+            if (currentHorizontalSpeed < targetSpeed - speedOffset ||
+                currentHorizontalSpeed > targetSpeed + speedOffset)
             {
-                _fallTimeoutDelta -= Time.deltaTime;
+                // 선형적인 결과보다는 곡선적인 결과를 생성하여 더 유기적인 속도 변화를 제공합니다.               
+                speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude, Time.deltaTime * speedChangeRate);
+
+                // 속도를 소숫점 3자리까지 반올림
+                speed = Mathf.Round(speed * 1000f) / 1000f;
             }
             else
-            {                
-                anim.SetBool("Falling", true);
-                anim.SetBool("Grounded", true);
-            }
-
-            // if we are not grounded, do not jump
-            //isJump = false;
-        }
-
-        // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
-        if (verticalVelocity < terminalVelocity)
-        {
-            verticalVelocity += Gravity * Time.deltaTime;
-        }
-    }
-
-    private void CameraRotation()
-    {
-        // 카메라 input값
-        float hMouse = Input.GetAxis("Mouse X");
-        float vMouse = Input.GetAxis("Mouse Y") * -1; //-1을 곱하는 이유는 상하반전을 일으킴(마우스 위아래 움직임)
-        look = new Vector2(hMouse, vMouse);
-
-        // if there is an input and camera position is not fixed
-        if (look.sqrMagnitude >= _threshold)
-        {
-            // Don't multiply mouse input by Time.deltaTime;
-            float deltaTimeMultiplier = 1.0f;
-
-            cinemachineTargetYaw += look.x * deltaTimeMultiplier * cameraHorizontalSpeed;
-            cinemachineTargetPitch += look.y * deltaTimeMultiplier * cameraVerticalSpeed;
-        }
-
-        // clamp our rotations so our values are limited 360 degrees
-        cinemachineTargetYaw = ClampAngle(cinemachineTargetYaw, float.MinValue, float.MaxValue);
-        cinemachineTargetPitch = ClampAngle(cinemachineTargetPitch, bottomClamp, topClamp);
-        
-        // Cinemachine will follow this target
-        cinemachineCameraTarget.transform.rotation = Quaternion.Euler(cinemachineTargetPitch + cameraAngleOverride, cinemachineTargetYaw, 0.0f);
-    }
-
-    private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
-    {
-        if (lfAngle < -360f) lfAngle += 360f;
-        if (lfAngle > 360f) lfAngle -= 360f;
-        return Mathf.Clamp(lfAngle, lfMin, lfMax);
-    }
-
-    private void GroundCheck()
-    {
-        // 플레이어 발바닥 위치
-        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
-
-        isGrounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers);  //QueryTriggerInteraction.Ignore        
-    }
-
-    private void ChangeState()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            characterState = 1;
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            characterState = 0;
-        }
-
-    }
-
-    private void WeaponAiming()
-    {
-        if (Input.GetKeyDown(KeyCode.Mouse1)) //mouse right duplicated with strafe
-        {
-            //zoom in
-            CameraManager.Instance.TargetFOV = aimFOV;
-            aimingIKBlendTarget = 1;
-            aimCanvas.gameObject.SetActive(true);
-        }
-        if (Input.GetKeyUp(KeyCode.Mouse1))
-        {
-            //zoom out
-            CameraManager.Instance.TargetFOV = defaultFOV;
-            aimingIKBlendTarget = 0;
-            aimCanvas.gameObject.SetActive(false);
-        }
-
-         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        
-        Vector3 aimingTargetPosition = Camera.main.transform.position + Camera.main.transform.forward * 1000f;
-
-        // Raycast 가 성공하면 aimingTargetPosition 을 Raycast가 성공한 지점으로 설정
-        if (Physics.Raycast(ray, out RaycastHit hitInfo, 1000f, aimingLayer))
-        {
-            if (hitInfo.transform.root != transform) 
             {
-                aimingTargetPosition = hitInfo.point;
+                speed = targetSpeed;
+            }
+
+
+            animationBlend = Mathf.Lerp(animationBlend, targetSpeed, Time.deltaTime * speedChangeRate);
+            if (animationBlend < 0.01f) animationBlend = 0f;
+
+            // normalise input direction
+            Vector3 inputDirection = new Vector3(move.x, 0.0f, move.y).normalized;
+
+            if (move != Vector2.zero)
+            {
+                targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
+                                  mainCamera.transform.eulerAngles.y;
+                float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
+                    rotationSmoothTime);
+
+                if (!isStrafe)
+                {
+                    // rotate to face input direction relative to camera position
+                    transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+                }
+            }
+
+
+            Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+
+            // Controller 이동
+            controller.Move(targetDirection.normalized * (speed * Time.deltaTime) +
+                             new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+
+            isSprint = Input.GetKey(KeyCode.LeftShift);
+            if (isSprint)
+            {
+                anim.SetFloat("MotionSpeed", 1.2f);
+            }
+            else
+            {
+                anim.SetFloat("MotionSpeed", 1f);
+            }          
+
+        }
+        private void JumpAndGravity()
+        {
+            isJump = Input.GetKeyDown(KeyCode.Space);
+
+            if (isGrounded)
+            {
+                // reset the fall timeout timer
+                _fallTimeoutDelta = FallTimeout;
+
+                // 애니메이션
+
+                anim.SetBool("Jump", false);
+                anim.SetBool("Falling", false);
+
+
+                // stop our velocity dropping infinitely when grounded
+                if (verticalVelocity < 0.0f)
+                {
+                    verticalVelocity = -2f;
+                }
+
+                // Jump
+                if (isJump && _jumpTimeoutDelta <= 0.0f)
+                {
+                    verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+
+                    anim.SetBool("Jump", true);
+                }
+
+                // jump timeout
+                if (_jumpTimeoutDelta >= 0.0f)
+                {
+                    _jumpTimeoutDelta -= Time.deltaTime;
+                }
+            }
+            else
+            {
+                // reset the jump timeout timer
+                _jumpTimeoutDelta = JumpTimeout;
+
+                // fall timeout
+                if (_fallTimeoutDelta >= 0.0f)
+                {
+                    _fallTimeoutDelta -= Time.deltaTime;
+                }
+                else
+                {
+                    anim.SetBool("Falling", true);
+                    anim.SetBool("Grounded", true);
+                }
+
+                // if we are not grounded, do not jump
+                //isJump = false;
+            }
+
+            // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
+            if (verticalVelocity < terminalVelocity)
+            {
+                verticalVelocity += Gravity * Time.deltaTime;
             }
         }
-        else // Raycasat 가 실패하면 카메라의 정면으로 1000 m 떨어진 지점을 설정
+
+        private void CameraRotation()
         {
+            // 카메라 input값
+            float hMouse = Input.GetAxis("Mouse X");
+            float vMouse = Input.GetAxis("Mouse Y") * -1; //-1을 곱하는 이유는 상하반전을 일으킴(마우스 위아래 움직임)
+            look = new Vector2(hMouse, vMouse);
+
+            // if there is an input and camera position is not fixed
+            if (look.sqrMagnitude >= _threshold)
+            {
+                // Don't multiply mouse input by Time.deltaTime;
+                float deltaTimeMultiplier = 1.0f;
+
+                cinemachineTargetYaw += look.x * deltaTimeMultiplier * cameraHorizontalSpeed;
+                cinemachineTargetPitch += look.y * deltaTimeMultiplier * cameraVerticalSpeed;
+            }
+
+            // clamp our rotations so our values are limited 360 degrees
+            cinemachineTargetYaw = ClampAngle(cinemachineTargetYaw, float.MinValue, float.MaxValue);
+            cinemachineTargetPitch = ClampAngle(cinemachineTargetPitch, bottomClamp, topClamp);
+
+            // Cinemachine will follow this target
+            cinemachineCameraTarget.transform.rotation = Quaternion.Euler(cinemachineTargetPitch + cameraAngleOverride, cinemachineTargetYaw, 0.0f);
+        }
+
+        private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
+        {
+            if (lfAngle < -360f) lfAngle += 360f;
+            if (lfAngle > 360f) lfAngle -= 360f;
+            return Mathf.Clamp(lfAngle, lfMin, lfMax);
+        }
+
+        private void GroundCheck()
+        {
+            // 플레이어 발바닥 위치
+            Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z);
+
+            isGrounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers);  //QueryTriggerInteraction.Ignore        
+        }
+
+        private void ChangeState()
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                characterState = 1;
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                characterState = 0;
+            }
 
         }
 
-        // aimingTargetPosition을 aimTarget의 위치로 설정
-        aimTarget.position = aimingTargetPosition;
+        private void WeaponAiming()
+        {
+            if (Input.GetKeyDown(KeyCode.Mouse1)) //mouse right duplicated with strafe
+            {
+                //zoom in
+                CameraManager.Instance.TargetFOV = aimFOV;
+                aimingIKBlendTarget = 1;
+                aimCanvas.gameObject.SetActive(true);                
+            }
+            if (Input.GetKeyUp(KeyCode.Mouse1))
+            {
+                //zoom out
+                CameraManager.Instance.TargetFOV = defaultFOV;
+                aimingIKBlendTarget = 0;
+                aimCanvas.gameObject.SetActive(false);                
+            }
+            if (isStrafe)
+            {
+                Vector3 cameraForward = Camera.main.transform.forward.normalized;
+                cameraForward.y = 0;
+                transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
+            }
 
-        aimingIKBlendCurrent = Mathf.Lerp(aimingIKBlendCurrent, aimingIKBlendTarget, Time.deltaTime * 10f);
-        aimingRig.weight = aimingIKBlendCurrent;       
-        bodyAimRig.weight = aimingIKBlendCurrent;
-        
+            Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+
+            Vector3 aimingTargetPosition = Camera.main.transform.position + Camera.main.transform.forward * 1000f;
+
+            // Raycast 가 성공하면 aimingTargetPosition 을 Raycast가 성공한 지점으로 설정
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, 1000f, aimingLayer))
+            {
+                if (hitInfo.transform.root != transform)
+                {
+                    aimingTargetPosition = hitInfo.point;
+                }
+            }
+            else // Raycasat 가 실패하면 카메라의 정면으로 1000 m 떨어진 지점을 설정
+            {
+
+            }
+
+            // aimingTargetPosition을 aimTarget의 위치로 설정
+            aimTarget.position = aimingTargetPosition;
+
+            aimingIKBlendCurrent = Mathf.Lerp(aimingIKBlendCurrent, aimingIKBlendTarget, Time.deltaTime * 10f);
+            aimingRig.weight = aimingIKBlendCurrent;
+            bodyAimRig.weight = aimingIKBlendCurrent;
+
+        }
+
+        private void WeaponShooting()
+        {
+            if (isStrafe && Input.GetKey(KeyCode.Mouse0))
+            {
+                currentWeapon?.Shoot();
+            }
+            else
+            {
+                currentWeapon.isFiring = false;
+            }
+            
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
+            Gizmos.color = transparentGreen;
+
+            Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
+        }
+
     }
-
-
-    private void OnDrawGizmosSelected()
-    {
-        Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
-        Gizmos.color = transparentGreen;
-                
-        Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
-    }
-
 }

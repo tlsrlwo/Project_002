@@ -3,29 +3,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraManager : MonoBehaviour
+namespace Project002
 {
-    public static CameraManager Instance { get; set; }
-
-    public CinemachineVirtualCamera tpsCamera;
-    public float TargetFOV { get; set; } = 60.0f;
-    public float zoomSpeed = 5.0f;
-
-
-
-    private void Awake()
+    public class CameraManager : MonoBehaviour
     {
-        if (Instance != null && Instance != this)
+        public static CameraManager Instance { get; set; }
+
+        public CinemachineVirtualCamera tpsCamera;
+        public float TargetFOV { get; set; } = 60.0f;
+        public float zoomSpeed = 5.0f;
+
+
+
+        private void Awake()
         {
-            Destroy(gameObject);
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                Instance = this;
+            }
         }
-        else
+        private void LateUpdate()
         {
-            Instance = this;
+            tpsCamera.m_Lens.FieldOfView = Mathf.Lerp(tpsCamera.m_Lens.FieldOfView, TargetFOV, zoomSpeed * Time.deltaTime);
         }
-    }
-    private void LateUpdate()
-    {
-        tpsCamera.m_Lens.FieldOfView = Mathf.Lerp(tpsCamera.m_Lens.FieldOfView, TargetFOV, zoomSpeed * Time.deltaTime);
     }
 }
