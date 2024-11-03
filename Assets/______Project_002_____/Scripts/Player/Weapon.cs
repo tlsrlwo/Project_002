@@ -15,6 +15,20 @@ namespace Project002
             Gizmos.DrawLine(Camera.main.transform.position, Camera.main.transform.position + Camera.main.transform.forward * range);
         }
 
+        public static Weapon Instance { get; set; }
+
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                Instance = this;
+            }
+        }
 
         // ÃÑ °ü·Ã
         public ParticleSystem muzzleFlash;
@@ -38,29 +52,33 @@ namespace Project002
 
         // Ray
         private Ray ray;
-        private RaycastHit hitInfo; 
+        private RaycastHit hitInfo;
 
+      
 
         public void Shoot()
         {
+            // 0.1ÃÊ¿¡ ÇÑ¹ß¾¿ 
             if (Time.time > lastShootTime + fireRate)
             {
                 lastShootTime = Time.time;
 
+                WeaponAmmo.Instance.currentAmmo--;
                 isFiring = true;
                 muzzleFlash.Emit(1);
 
                 ray.origin = firePosition.position;
                 ray.direction = aimPosition.position - firePosition.position;
 
-                //create Bullet tracer
+                // ÃÑ¾Ë È¿°ú
                 var tracer = Instantiate(tracerEffect, ray.origin, Quaternion.identity);
                 tracer.AddPosition(ray.origin);
 
+                // ½ÇÁ¦ ÃÑ¾Ë
                 var newBullet = Instantiate(bulletPrefab);
 
                 var cameraTransfrom = Camera.main.transform;
-                newBullet.transform.SetPositionAndRotation(cameraTransfrom.position, cameraTransfrom.rotation); 
+                newBullet.transform.SetPositionAndRotation(cameraTransfrom.position, cameraTransfrom.rotation);
                 newBullet.gameObject.SetActive(true);
 
                 if (Physics.Raycast(ray, out hitInfo, range, hitLayer))
@@ -72,8 +90,13 @@ namespace Project002
 
                     tracer.transform.position = hitInfo.point;
                 }
-                
             }
         } 
+
+    
+
+
+
+
     }
 }
