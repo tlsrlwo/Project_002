@@ -51,7 +51,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6947744439989880496}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -148,4 +148,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 100
   lifeTime: 10
+  damage: 1
   hitEffect: {fileID: 7052846110766402435, guid: d24b3e82cbeefc1419854cea881dc07d, type: 3}

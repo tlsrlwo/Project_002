@@ -9,7 +9,10 @@ namespace Project002
         public float speed = 30f;
         public float lifeTime = 10f;
 
+        public float damage = 1f;
+
         public GameObject hitEffect;
+        EnemyHealth enemyHealth;
 
         private void Start()
         {
@@ -25,7 +28,13 @@ namespace Project002
         {
            if(collision.gameObject.CompareTag("Enemy"))
             {
-                print("Enemy hit");
+                if (collision.gameObject.TryGetComponent(out EnemyHealth enemyHealth))
+                {
+                    Debug.Log("PlayerHitByBullet");
+                    enemyHealth.TakeDamage(damage);
+                    print("Enemy hit");
+                }
+                //enemyHealth.TakeDamage(damage);
             }
             Destroy(gameObject);
         }

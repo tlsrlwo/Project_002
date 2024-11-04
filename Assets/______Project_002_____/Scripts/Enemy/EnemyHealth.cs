@@ -1,26 +1,39 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Project002
 {
     public class EnemyHealth : MonoBehaviour
     {
-        public float health;
+        public float currentHealth;
+        public float maxHealth;
         //RagdollManager ragdollManager;
         [HideInInspector] public bool isDead;
 
+        public Image fillImage;
+
+
         private void Start()
         {
-            //ragdollManager = GetComponent<RagdollManager>();
+            currentHealth = maxHealth;
         }
+
+        private void Update()
+        {
+            float percentage = currentHealth / maxHealth;
+
+            fillImage.fillAmount = percentage;
+        }
+
 
         public void TakeDamage(float damage)
         {
-            if (health > 0)
+            if (currentHealth > 0)
             {
-                health -= damage;
-                if (health <= 0) EnemyDeath();
+                currentHealth -= damage;
+                if (currentHealth <= 0) EnemyDeath();
                 else Debug.Log("Hit");
             }
 

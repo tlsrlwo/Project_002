@@ -9,11 +9,8 @@ namespace Project002
     {
         public static WeaponManager Instance { get; set; }
 
-        private Weapon weapon;
-        public GameObject gunWeapon;
-        public bool hasWeapon;
 
-
+      
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -23,24 +20,7 @@ namespace Project002
             else
             {
                 Instance = this;
-            }
-
-            // ¹«±â
-            var weaponGameObject = TransformUtility.FindGameObjectWithTag(gunWeapon, "Weapon");
-            weapon = weaponGameObject.GetComponent<Weapon>();
-
-            if(weapon)
-            {
-                EquipWeapon(weapon);
-                
-            }
+            }          
         }
-
-        public void EquipWeapon(Weapon newWeapon)
-        {
-            weapon = newWeapon;
-            hasWeapon = true;
-        }
-
     }
 }

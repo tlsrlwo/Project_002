@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Project002
 {
@@ -25,15 +26,17 @@ namespace Project002
         public int maxAmmo;
 
         public float chargeTimerDelta = 0.0f;
-        private float chargeTimerDelay = 3.0f;
-        
+        private float chargeTimerDelay = 2.0f;
 
+        // Ammo Canvas 
+
+        public Canvas ammoCanvas;
+        private Image ammoFill;
 
 
         private void Start()
         {
-            currentAmmo = maxAmmo;
-            
+            currentAmmo = maxAmmo;            
         }
 
         private void Update()
@@ -47,6 +50,14 @@ namespace Project002
                 }
             }
         }
+
+        private void AmmoCanvasControl()
+        {
+            float currentPercentage = (float)currentAmmo / maxAmmo;
+            ammoFill.fillAmount = 0.5f;            
+        }
+
+
 
         private IEnumerator WeaponChargingTime()
         {
