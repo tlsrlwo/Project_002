@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 namespace Project002
@@ -12,12 +14,21 @@ namespace Project002
         //RagdollManager ragdollManager;
         [HideInInspector] public bool isDead;
 
-        public Image fillImage;
+        private Animator anim;
 
+        public Canvas hpCanvas;
+        public Image fillImage;
+        //private NavMeshAgent navMeshAgent;
+        private EnemyController enemyController;
+        private Collider collider;
 
         private void Start()
         {
+            enemyController = GetComponent<EnemyController>();
             currentHealth = maxHealth;
+            anim = GetComponentInChildren<Animator>();
+            collider = GetComponent<CapsuleCollider>();  
+            isDead = false;
         }
 
         private void Update()
@@ -33,15 +44,28 @@ namespace Project002
             if (currentHealth > 0)
             {
                 currentHealth -= damage;
-                if (currentHealth <= 0) EnemyDeath();
-                else Debug.Log("Hit");
+                if (currentHealth <= 0)
+                {
+                    collider.enabled = false;
+                    hpCanvas.gameObject.SetActive(false);
+                    enemyController.enabled = false;
+                    isDead = true;
+                    EnemyDeath();
+                    StartCoroutine(DestroyEnemyObject());
+                }               
             }
-
         }
+
+        IEnumerator DestroyEnemyObject()
+        {
+            yield return new WaitForSeconds(10f);
+            Destroy(gameObject);
+        }
+
         void EnemyDeath()
         {
-            //ragdollManager.TriggerRagdoll();
-            Debug.Log("Death");
+            anim.SetTrigger("isDead");
+            Debug.Log("Enemy Death");
         }
     }
 }

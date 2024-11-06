@@ -9,6 +9,7 @@ TagManager:
   - ClickBlock
   - Enemy
   - Ground
+  - WayPoints
   layers:
   - Default
   - TransparentFX

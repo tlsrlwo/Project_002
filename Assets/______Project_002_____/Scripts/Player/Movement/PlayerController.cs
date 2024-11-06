@@ -403,9 +403,7 @@ namespace Project002
                 anim.SetLayerWeight(1, 1f);
                 defaultWeaponPoseRig.weight = 1;
                 gunWeapon.gameObject.SetActive(true);
-            }
-
-         
+            }         
         }
 
         private void WeaponAiming()
@@ -436,8 +434,6 @@ namespace Project002
             }
 
             return true;
-
-
         }
 
 
