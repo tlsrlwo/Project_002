@@ -19,7 +19,7 @@ namespace Project002
         {
             if(other.CompareTag("Player"))
             {
-                PlayerController.Instance.characterState = 1;
+                PlayerState.Instance.characterState = 1;
             }
         }
     }

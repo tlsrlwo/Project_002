@@ -64,23 +64,31 @@ namespace Project002
         {
             float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
 
-            switch (currentState)
+            if (PlayerHealth.Instance.IsDead())
             {
-                case AIState.Idle:
-                    enemyIdleState();
-                    break;
+                agent.isStopped = true;
+                anim.SetBool("isWalking", false);
+            }
+            else
+            {
+                switch (currentState)
+                {
+                    case AIState.Idle:
+                        enemyIdleState();
+                        break;
 
-                case AIState.Patrolling:
-                    enemyPatrollingState();
-                    break;
+                    case AIState.Patrolling:
+                        enemyPatrollingState();
+                        break;
 
-                case AIState.Chasing:
-                    enemyChasingState();
-                    break;
+                    case AIState.Chasing:
+                        enemyChasingState();
+                        break;
 
-                case AIState.Attacking:
-                    enemyAttackingState();
-                    break;
+                    case AIState.Attacking:
+                        enemyAttackingState();
+                        break;
+                }
             }
         }
 

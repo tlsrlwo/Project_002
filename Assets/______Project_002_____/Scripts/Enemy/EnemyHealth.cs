@@ -18,16 +18,17 @@ namespace Project002
 
         public Canvas hpCanvas;
         public Image fillImage;
-        //private NavMeshAgent navMeshAgent;
+        private NavMeshAgent navMeshAgent;
         private EnemyController enemyController;
-        private Collider collider;
+        private CapsuleCollider capsuleCollider;
 
         private void Start()
         {
+            navMeshAgent = GetComponent<NavMeshAgent>();
             enemyController = GetComponent<EnemyController>();
             currentHealth = maxHealth;
             anim = GetComponentInChildren<Animator>();
-            collider = GetComponent<CapsuleCollider>();  
+            capsuleCollider = GetComponent<CapsuleCollider>();  
             isDead = false;
         }
 
@@ -46,7 +47,8 @@ namespace Project002
                 currentHealth -= damage;
                 if (currentHealth <= 0)
                 {
-                    collider.enabled = false;
+                    navMeshAgent.isStopped = true;
+                    capsuleCollider.enabled = false;
                     hpCanvas.gameObject.SetActive(false);
                     enemyController.enabled = false;
                     isDead = true;

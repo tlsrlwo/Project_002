@@ -16,9 +16,7 @@ namespace Project002
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(aimTarget.position, 0.1f);
         }
-
-        public static PlayerController Instance { get; set; }   
-
+        
 
         #region References
         CharacterController controller;
@@ -50,24 +48,10 @@ namespace Project002
         public float Gravity = -15.0f;
         public float JumpHeight = 1.2f;
 
-        [Header("Weapon")]
-        public GameObject gunWeapon;
-
-        [Header("Weapon FOV")]
-        public float defaultFOV;
-        public float aimFOV;
-
         [Header("Weapon Aiming")]
         public Transform aimTarget;
         public LayerMask aimingLayer;
-        public float aimingIKBlendTarget;
-        public float aimingIKBlendCurrent;
-        public Rig defaultWeaponPoseRig;
-        public Rig AimingRig;
-
-        [Header("Canavs")]
-        public Canvas aimCanvas;
-
+             
         // Strafe
         private bool isStrafe;
 
@@ -99,36 +83,16 @@ namespace Project002
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
         private bool isJump = false;
-        
-
-        // Weapon
-        private Weapon currentWeapon;       
-        
-
 
         #endregion
 
         private void Awake()
-        {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(gameObject);
-            }
-            else
-            {
-                Instance = this;
-            }
-
+        {            
             // 컴포넌트
             controller = GetComponent<CharacterController>();
             anim = GetComponentInChildren<Animator>();
             mainCamera = Camera.main;
 
-            // 무기
-            var weaponGameObject = TransformUtility.FindGameObjectWithTag(gunWeapon, "Weapon");
-            currentWeapon = weaponGameObject.GetComponent<Weapon>();
-
-            gunWeapon.gameObject.SetActive(false);
         }
 
         private void Start()
@@ -136,12 +100,10 @@ namespace Project002
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
 
-            // reset our timeouts on start
+            // 점프 관련 타이머 초기화
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
-
-            defaultWeaponPoseRig.weight = 0;
-            AimingRig.weight = 0;
+            
         }
 
 
@@ -151,7 +113,6 @@ namespace Project002
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
             move = new Vector2(horizontal, vertical);
-
 
             anim.SetFloat("Speed", animationBlend);
             anim.SetFloat("hInput", move.x);
@@ -163,11 +124,6 @@ namespace Project002
             JumpAndGravity();
             GroundCheck();
             Movement();
-            ChangeState();
-            //WeaponAiming();
-
-            
-      
         }
 
         private void LateUpdate()
@@ -252,37 +208,6 @@ namespace Project002
                 transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
 
                 WeaponAiming();
-            }
-
-            ////////////////////////////////////////////// 총 쓸 때 IK 랑 총 쏘는 거///////////////////////////////////////////
-            if (characterState == 1 && Input.GetKey(KeyCode.Mouse1))
-            {
-                defaultWeaponPoseRig.weight = 0;                       
-                AimingRig.weight = 1;
-                anim.SetBool("isAiming", true);
-                //aimCanvas.gameObject.SetActive(true);
-
-                //zoom in
-                CameraManager.Instance.TargetFOV = aimFOV;
-                if (Input.GetKey(KeyCode.Mouse0))
-                {
-                    if (ShouldFire()) currentWeapon.Shoot();                    
-                }
-                else
-                {
-                    currentWeapon.isFiring = false;
-                    WeaponAmmo.Instance.AmmoUpdateTimer();
-                }
-                
-            }
-            if (characterState == 1 && Input.GetKeyUp(KeyCode.Mouse1))            
-            {
-                defaultWeaponPoseRig.weight = 1;
-                AimingRig.weight = 0;
-                anim.SetBool("isAiming", false);
-                //aimCanvas.gameObject.SetActive(false);                
-
-                CameraManager.Instance.TargetFOV = defaultFOV;
             }
 
         }
@@ -387,28 +312,10 @@ namespace Project002
 
             isGrounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers);  //QueryTriggerInteraction.Ignore        
         }
-
-        private void ChangeState()
-        {
-            if(characterState == 0)
-            {
-                // 무기없는 상태. 총 애니메이션 layerweight 0. 무기자세ik 0 
-                anim.SetLayerWeight(1, 0f);                         
-                defaultWeaponPoseRig.weight = 0;
-                gunWeapon.gameObject.SetActive(false);
-            }
-            if (characterState == 1)
-            {
-                // 총 상태. 총 애니메이션 layerweight 1, 무기자세 1
-                anim.SetLayerWeight(1, 1f);
-                defaultWeaponPoseRig.weight = 1;
-                gunWeapon.gameObject.SetActive(true);
-            }         
-        }
+  
 
         private void WeaponAiming()
-        {
-      
+        {      
             Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
             Vector3 aimingTargetPosition = Camera.main.transform.position + Camera.main.transform.forward * 1000f;
@@ -436,9 +343,7 @@ namespace Project002
             return true;
         }
 
-
-
-        
+                
         private void OnDrawGizmosSelected()
         {
             Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
