@@ -47,7 +47,7 @@ namespace Project002
 
             // 인풋값이 없으면 targetSpeed를 0으로 설정
             if (move == Vector2.zero) moveSpeed = 0.0f;
-            else moveSpeed = 4f;
+            else moveSpeed = 4.5f;
 
             // 플레이어의 수평 이동속도값 (점프가 수직)
             float currentHorizontalSpeed = new Vector3(controller.velocity.x, 0.0f, controller.velocity.z).magnitude;
