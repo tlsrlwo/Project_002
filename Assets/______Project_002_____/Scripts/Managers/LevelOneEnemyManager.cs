@@ -23,7 +23,8 @@ namespace Project002
             {
                 Instance = this;
             }
-        }
+        }           
+        // 적의 잔여 수를 세는 매니저
 
         private void Start()
         {

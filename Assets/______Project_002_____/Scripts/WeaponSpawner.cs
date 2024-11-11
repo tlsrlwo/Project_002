@@ -20,6 +20,7 @@ namespace Project002
             if(other.CompareTag("Player"))
             {
                 PlayerState.Instance.characterState = 1;
+                Destroy(transform.gameObject);
             }
         }
     }

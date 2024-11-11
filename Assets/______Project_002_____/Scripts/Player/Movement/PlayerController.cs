@@ -121,14 +121,20 @@ namespace Project002
             anim.SetBool("Grounded", isGrounded);
 
             // 각종 함수 실행
-            JumpAndGravity();
-            GroundCheck();
-            Movement();
+            if (!LevelOneTutorialCanvas.Instance.isOpen)
+            {
+                Movement();
+                JumpAndGravity();
+            }
+                GroundCheck();
         }
 
         private void LateUpdate()
         {
-            CameraRotation();
+            if (!LevelOneTutorialCanvas.Instance.isOpen)
+            {
+                CameraRotation();
+            }
         }
 
         private void Movement()
