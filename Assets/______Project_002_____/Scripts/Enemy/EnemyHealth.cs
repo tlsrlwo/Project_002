@@ -21,6 +21,7 @@ namespace Project002
         private NavMeshAgent navMeshAgent;
         private EnemyController enemyController;
         private CapsuleCollider capsuleCollider;
+                
 
         private void Start()
         {
@@ -61,13 +62,14 @@ namespace Project002
         IEnumerator DestroyEnemyObject()
         {
             yield return new WaitForSeconds(10f);
-            Destroy(gameObject);
+            Destroy(gameObject);            
         }
 
         void EnemyDeath()
         {
             anim.SetTrigger("isDead");
             Debug.Log("Enemy Death");
+            LevelOneEnemyManager.Instance.enemyCount--;
         }
     }
 }

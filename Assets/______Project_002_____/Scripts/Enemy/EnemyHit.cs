@@ -23,8 +23,9 @@ namespace Project002
         private void OnTriggetEnter(Collision collision)
         {
             if(collision.gameObject.CompareTag("Player"))
-            {               
+            {
                 EnemyPunch();
+                //collision.gameObject.GetComponent<PlayerHealth>().currentHealth--;
             }
         }
     }
