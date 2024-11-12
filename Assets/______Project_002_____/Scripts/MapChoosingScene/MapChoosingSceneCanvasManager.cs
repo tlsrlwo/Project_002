@@ -4,10 +4,14 @@ using UnityEngine;
 
 namespace Project002
 {
-    public class LevelOneTutorialCanvas : MonoBehaviour
+    public class MapChoosingSceneCanvasManager : MonoBehaviour
     {
-        // UI 들 관리해주는 스크립트
-        public static LevelOneTutorialCanvas Instance { get; set; }
+        public static MapChoosingSceneCanvasManager Instance { get;  set; } 
+
+        public GameObject pauseScreenUI;
+
+        public bool isOpen;
+
 
         private void Awake()
         {
@@ -19,23 +23,6 @@ namespace Project002
             {
                 Instance = this;
             }
-        }
-
-        // 캔버스 & 버튼
-        public GameObject howToMoveUI;
-        public GameObject howToLookUI;
-        public GameObject howToShootUI;
-        public GameObject pauseScreenUI;
-
-
-        public bool isOpen = false;
-
-        void Start() 
-        {
-            isOpen = false;
-            howToLookUI.SetActive(false);
-            howToShootUI.SetActive(false);
-            StartCoroutine(ShowTutorialCanvas());
         }
 
         private void Update()
@@ -54,11 +41,10 @@ namespace Project002
 
                 Time.timeScale = 1.0f;
             }
-
             // esc 창 여는 부분
-            if(Input.GetKeyDown(KeyCode.Tab))
+            if (Input.GetKeyDown(KeyCode.Tab))
             {
-                if(!isOpen)
+                if (!isOpen)
                 {
                     OpenPauseScreen();
                 }
@@ -68,18 +54,7 @@ namespace Project002
                 }
             }
 
-
-
         }
-
-        IEnumerator ShowTutorialCanvas()
-        {
-            yield return new WaitForSeconds(3f);
-            howToMoveUI.SetActive(true);
-
-            isOpen = true;
-        }
-
 
         void OpenPauseScreen()
         {
@@ -92,6 +67,7 @@ namespace Project002
             pauseScreenUI.SetActive(false);
             isOpen = false;
         }
+
 
     }
 }
