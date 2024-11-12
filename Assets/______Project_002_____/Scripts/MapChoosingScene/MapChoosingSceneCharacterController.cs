@@ -20,6 +20,19 @@ namespace Project002
         [Range(0.0f, 0.3f)] public float rotationSmoothTime = 0.12f;
 
 
+        // GroundCheck
+        [SerializeField] float groundYOffset;
+        [SerializeField] LayerMask groundMask;
+        Vector3 spherePos;
+        
+        // Gravity
+        [SerializeField] float gravity = -9.81f;
+        [SerializeField] float jumpForce = 10;
+        [HideInInspector] public bool jumped;
+        Vector3 velocity;
+        
+
+
         private CharacterController controller;
         private Camera mainCamera;
         private Animator anim;
@@ -33,7 +46,8 @@ namespace Project002
 
         private void Update()
         {
-            Movement();   
+            Movement();
+            Gravity();
         }
 
 
@@ -94,9 +108,31 @@ namespace Project002
             // +new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
 
             anim.SetFloat("Speed", moveSpeed);
+        }
 
-     
+        public bool IsGrounded()
+        {
+            spherePos = new Vector3(transform.position.x, transform.position.y - groundYOffset, transform.position.z);
+            if (Physics.CheckSphere(spherePos, controller.radius - 0.05f, groundMask)) return true;
+            return false;
+        }
+        void Gravity()
+        {
+            if (!IsGrounded())
+            {
+                velocity.y += gravity * Time.deltaTime;
+            }
+            else if (velocity.y < 0)
+            {
+                velocity.y = -2;
+            }
+            controller.Move(velocity * Time.deltaTime);
+        }
 
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(spherePos, controller.radius - 0.05f);
         }
     }
 }

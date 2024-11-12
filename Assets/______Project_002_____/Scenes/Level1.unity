@@ -96,7 +96,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 14dd6e0a5d5087b489cca51dc35183d1, type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -5078,7 +5078,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &813373818
 Transform:
   m_ObjectHideFlags: 0
@@ -5468,6 +5468,10 @@ PrefabInstance:
     - target: {fileID: 7136023390551284957, guid: 932bf037b41d47247982227c45b5df0e, type: 3}
       propertyPath: m_Name
       value: hp_Item
+      objectReference: {fileID: 0}
+    - target: {fileID: 7136023390551284957, guid: 932bf037b41d47247982227c45b5df0e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
