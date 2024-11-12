@@ -25,6 +25,8 @@ namespace Project002
         public int currentAmmo;
         public int maxAmmo;
 
+        public bool isCharging;
+
         public float chargeTimerDelta = 0.0f;
         private float chargeTimerDelay = 2.0f;
 
@@ -44,11 +46,21 @@ namespace Project002
             if (!Weapon.Instance.isFiring && chargeTimerDelta > 0.0f && currentAmmo < maxAmmo)        // 쏘고 있지 않고, 마지막 발사 시간에서 2초가 지났고, 현재총알이 최대총알보다 적으면
             {
                 chargeTimerDelta -= Time.deltaTime;
-                if(chargeTimerDelta < 0.0f )
+                
+                if(Input.GetMouseButtonUp(1))
+                {
+                    isCharging = true;
+                }
+                if (chargeTimerDelta < 0.0f)
                 {
                     StartCoroutine(WeaponChargingTime());
                 }
             }
+            if(currentAmmo >= maxAmmo)
+            {
+                isCharging = false;
+            }
+
         }
 
         private void AmmoCanvasControl()

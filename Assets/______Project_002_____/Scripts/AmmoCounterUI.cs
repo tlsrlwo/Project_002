@@ -11,6 +11,8 @@ namespace Project002
         public Image fillImage;
         private Image fillBackground;
 
+        public GameObject reloadingText;
+
         private float currentAmmo;
         private float maxAmmo;
         private float ammoFillImageSharpness = 10f;
@@ -23,6 +25,15 @@ namespace Project002
             float currentPercentage = currentAmmo / maxAmmo;
 
             fillImage.fillAmount = Mathf.Lerp(fillImage.fillAmount, currentPercentage, Time.deltaTime * ammoFillImageSharpness); //(float)currentPercentage; 
+
+            if(WeaponAmmo.Instance.isCharging)
+            {
+                reloadingText.SetActive(true);
+            }
+            else
+            {
+                reloadingText.SetActive(false);
+            }
 
         }
     }

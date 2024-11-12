@@ -62,6 +62,7 @@ namespace Project002
             if (Time.time > lastShootTime + fireRate)
             {
                 lastShootTime = Time.time;
+                WeaponAmmo.Instance.isCharging = false;
 
                 WeaponAmmo.Instance.currentAmmo--;
                 isFiring = true;

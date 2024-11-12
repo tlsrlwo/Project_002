@@ -87,6 +87,7 @@ namespace Project002
             }
             if (characterState == 1 && Input.GetKeyUp(KeyCode.Mouse1))
             {
+                currentWeapon.isFiring = false;
                 defaultWeaponPoseRig.weight = 1;
                 AimingRig.weight = 0;
                 anim.SetBool("isAiming", false);
