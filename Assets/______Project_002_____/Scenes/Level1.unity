@@ -10065,17 +10065,9 @@ PrefabInstance:
       propertyPath: weaponAmmoCanvas
       value: 
       objectReference: {fileID: 804843391}
-    - target: {fileID: 2424048208756185984, guid: ffb8965106798294a8ec8d1d570a1f3b, type: 3}
-      propertyPath: moveSpeed
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 4983093152696185761, guid: ffb8965106798294a8ec8d1d570a1f3b, type: 3}
       propertyPath: m_Name
       value: PicoChanPrefab
-      objectReference: {fileID: 0}
-    - target: {fileID: 4983093152696185761, guid: ffb8965106798294a8ec8d1d570a1f3b, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7057644304347691710, guid: ffb8965106798294a8ec8d1d570a1f3b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -10116,10 +10108,6 @@ PrefabInstance:
     - target: {fileID: 7057644304347691710, guid: ffb8965106798294a8ec8d1d570a1f3b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8569165411372581325, guid: ffb8965106798294a8ec8d1d570a1f3b, type: 3}
-      propertyPath: m_StepOffset
-      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

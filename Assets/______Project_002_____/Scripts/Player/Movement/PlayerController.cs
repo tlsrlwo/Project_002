@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using UnityEngine.Rendering;
@@ -16,7 +17,12 @@ namespace Project002
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(aimTarget.position, 0.1f);
         }
-        
+
+        public bool IsEnableMovement
+        {
+            set => isEnableMovement = value;
+        }
+
 
         #region References
         CharacterController controller;
@@ -65,6 +71,8 @@ namespace Project002
         private float verticalVelocity;
         private float terminalVelocity = 53.0f;
 
+        private bool isEnableMovement = true;
+
         // Camera
         private Vector2 look;
         private const float _threshold = 0.01f;
@@ -112,7 +120,7 @@ namespace Project002
             // 플레이어 이동 input값
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
-            move = new Vector2(horizontal, vertical);
+            move = new Vector2(horizontal, vertical);           
 
             anim.SetFloat("Speed", animationBlend);
             anim.SetFloat("hInput", move.x);
@@ -121,25 +129,28 @@ namespace Project002
             anim.SetBool("Grounded", isGrounded);
 
             // 각종 함수 실행
-            if (!LevelOneTutorialCanvas.Instance.isOpen)
+            //if (!LevelOneTutorialCanvas.Instance.isOpen)
+            //{
+            //}
+            if(!PlayerState.Instance.isSwordAttacking)
             {
+
                 Movement();
-                JumpAndGravity();
             }
+                JumpAndGravity();
                 GroundCheck();
         }
 
         private void LateUpdate()
         {
-            if (!LevelOneTutorialCanvas.Instance.isOpen)
-            {
+            //if (!LevelOneTutorialCanvas.Instance.isOpen)
+            //{
+            //}
                 CameraRotation();
-            }
         }
 
         private void Movement()
         {
-
             // isSprint에 따라 스피드 변화
             float targetSpeed = isSprint ? sprintSpeed : moveSpeed;
 
@@ -181,7 +192,7 @@ namespace Project002
                 float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
                     rotationSmoothTime);
 
-                if (!isStrafe)
+                if (!isStrafe || PlayerState.Instance.characterState == 2)
                 {
                     // rotate to face input direction relative to camera position
                     transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
@@ -207,15 +218,17 @@ namespace Project002
 
             // strafe
             isStrafe = Input.GetKey(KeyCode.Mouse1);
-            if (isStrafe)
+            if (PlayerState.Instance.characterState != 2)
             {
-                Vector3 cameraForward = Camera.main.transform.forward.normalized;
-                cameraForward.y = 0;
-                transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
+                if (isStrafe)
+                {
+                    Vector3 cameraForward = Camera.main.transform.forward.normalized;
+                    cameraForward.y = 0;
+                    transform.forward = cameraForward;      // 캐릭터의 방향을 카메라의 앞 방향으로 고정
 
-                WeaponAiming();
+                    WeaponAiming();
+                }
             }
-
         }
         private void JumpAndGravity()
         {
