@@ -18,9 +18,9 @@ namespace Project002
             Gizmos.DrawWireSphere(aimTarget.position, 0.1f);
         }
 
-        public bool IsEnableMovement
+        public bool IsGrounded
         {
-            set => isEnableMovement = value;
+            set => isGrounded = value;
         }
 
 
@@ -85,7 +85,7 @@ namespace Project002
         private float bottomClamp = -30.0f;
 
         //Gravity
-        private bool isGrounded;
+        public bool isGrounded;
         private float JumpTimeout = 0.50f;       //Time required to pass before being able to jump again. Set to 0f to instantly jump again        
         private float FallTimeout = 0.15f;       //Time required to pass before entering the fall state. Useful for walking down stairs
         private float _jumpTimeoutDelta;

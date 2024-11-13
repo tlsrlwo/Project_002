@@ -105,7 +105,9 @@ namespace Project002
 
         private void SwordAttack()
         {
-            if(characterState == 2 && Input.GetKeyDown(KeyCode.Mouse0))
+            PlayerController controller = transform.GetComponent<PlayerController>();
+
+            if(controller.isGrounded && characterState == 2 && Input.GetKeyDown(KeyCode.Mouse0))
             {
                 isSwordAttacking = true;
 
