@@ -12,15 +12,15 @@ namespace Project002
         
         public GameObject pressEButton;
         public GameObject enterLevelGameObject;
-        
 
-   
+     
+
 
         private void Update()
         {        
             if (pressEButton && Input.GetKeyDown(KeyCode.E))
             {
-                SceneManager.LoadScene(levelName);                
+                SceneManager.LoadScene(levelName);
             }
         }
 
@@ -30,6 +30,7 @@ namespace Project002
             {
                 pressEButton.SetActive(true);
                 enterLevelGameObject.SetActive(true);
+                print(levelName);
             }
         }
 
