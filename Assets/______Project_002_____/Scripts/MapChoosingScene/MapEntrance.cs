@@ -18,9 +18,10 @@ namespace Project002
 
         private void Update()
         {        
-            if (pressEButton && Input.GetKeyDown(KeyCode.E))
+            if (pressEButton && Input.GetKeyDown(KeyCode.F))
             {
                 SceneManager.LoadScene(levelName);
+                SaveManager.Instance.SaveGame();
             }
         }
 

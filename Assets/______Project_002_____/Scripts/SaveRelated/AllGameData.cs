@@ -4,10 +4,9 @@ using UnityEngine;
 
 namespace Project002
 {
-    public class MapChoosingSceneLevelManager : MonoBehaviour
+    [System.Serializable]
+    public class AllGameData 
     {
-        public int currentStageLevel;
-
-
+        public PlayerData playerData;
     }
 }

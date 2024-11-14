@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Project002
 {
@@ -15,11 +16,23 @@ namespace Project002
             {
                 if(Input.GetKeyDown(KeyCode.E))
                 {
-                    print("E is pressed");
+                    if (LevelManager.Instance.currentStageLevel < 3)
+                    {
+                        LevelManager.Instance.currentStageLevel++;
+                        StartCoroutine(LoadNextScene());
+                        SaveManager.Instance.SaveGame();
+                        
+                        //LevelManager.Instance.playerbody.transform.position = LevelManager.Instance.levelEntrance[LevelManager.Instance.currentStageLevel].transform.position;
+                    }
                 }
             }
         }
 
+        IEnumerator LoadNextScene()
+        {
+            SceneManager.LoadScene("MapChoosingScene");
+            yield return new WaitForSeconds(1f);
+        }
 
         private void OnTriggerEnter(Collider other)
         {

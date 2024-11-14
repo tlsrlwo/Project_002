@@ -10,7 +10,7 @@ using UnityEngine.Rendering;
 
 namespace Project002
 {
-    public class PlayerController : MonoBehaviour
+    public class LevelOnePlayerController : MonoBehaviour
     {
         private void OnDrawGizmos()
         {
@@ -57,7 +57,7 @@ namespace Project002
         [Header("Weapon Aiming")]
         public Transform aimTarget;
         public LayerMask aimingLayer;
-             
+
         // Strafe
         private bool isStrafe;
 
@@ -95,7 +95,7 @@ namespace Project002
         #endregion
 
         private void Awake()
-        {            
+        {
             // 컴포넌트
             controller = GetComponent<CharacterController>();
             anim = GetComponentInChildren<Animator>();
@@ -111,7 +111,7 @@ namespace Project002
             // 점프 관련 타이머 초기화
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
-            
+
         }
 
 
@@ -120,28 +120,28 @@ namespace Project002
             // 플레이어 이동 input값
             float horizontal = Input.GetAxis("Horizontal");
             float vertical = Input.GetAxis("Vertical");
-            move = new Vector2(horizontal, vertical);           
+            move = new Vector2(horizontal, vertical);
 
             anim.SetFloat("Speed", animationBlend);
             anim.SetFloat("hInput", move.x);
             anim.SetFloat("vInput", move.y);
             anim.SetFloat("Strafe", isStrafe ? 1 : 0);
             anim.SetBool("Grounded", isGrounded);
-       
-            if(!PlayerState.Instance.isSwordAttacking)
+
+            if (!PlayerState.Instance.isSwordAttacking && !LevelOneTutorialCanvas.Instance.isOpen)
             {
                 Movement();
             }
-                JumpAndGravity();
-                GroundCheck();
+            JumpAndGravity();
+            GroundCheck();
         }
 
         private void LateUpdate()
         {
-            //if (!LevelOneTutorialCanvas.Instance.isOpen)
-            //{
-            //}
+            if (!LevelOneTutorialCanvas.Instance.isOpen)
+            {
                 CameraRotation();
+            }
         }
 
         private void Movement()
@@ -326,10 +326,10 @@ namespace Project002
 
             isGrounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers);  //QueryTriggerInteraction.Ignore        
         }
-  
+
 
         private void WeaponAiming()
-        {      
+        {
             Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
             Vector3 aimingTargetPosition = Camera.main.transform.position + Camera.main.transform.forward * 1000f;
@@ -341,15 +341,15 @@ namespace Project002
                 {
                     aimingTargetPosition = hitInfo.point;
                 }
-            }         
+            }
 
             // aimingTargetPosition을 aimTarget의 위치로 설정
-            aimTarget.position = aimingTargetPosition;                      
+            aimTarget.position = aimingTargetPosition;
         }
 
         private bool ShouldFire()
         {
-            if(WeaponAmmo.Instance.currentAmmo == 0)
+            if (WeaponAmmo.Instance.currentAmmo == 0)
             {
                 return false;
             }
@@ -357,7 +357,7 @@ namespace Project002
             return true;
         }
 
-                
+
         private void OnDrawGizmosSelected()
         {
             Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);

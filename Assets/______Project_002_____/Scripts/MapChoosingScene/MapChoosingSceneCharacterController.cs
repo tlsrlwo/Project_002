@@ -30,18 +30,24 @@ namespace Project002
         [SerializeField] float jumpForce = 10;
         [HideInInspector] public bool jumped;
         Vector3 velocity;
-        
 
+        public Transform levelList;
+        public List<Transform> levelEntrance = new List<Transform>();
 
         private CharacterController controller;
         private Camera mainCamera;
         private Animator anim;
 
-        private void Start()
+        private void Awake()
         {
             controller = GetComponent<CharacterController>();
             mainCamera = Camera.main;
-            anim = GetComponentInChildren<Animator>();
+            anim = GetComponentInChildren<Animator>(); 
+        }
+
+        private void Start()
+        {
+            
         }
 
         private void Update()
