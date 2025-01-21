@@ -5,23 +5,20 @@ using UnityEngine.SceneManagement;
 
 namespace Project002
 {
-    public class EndOfLevelDoor : MonoBehaviour
+    public class EndOfLevelTwo : MonoBehaviour
     {
-        public Canvas levelFinishedCanvas;
-        public GameObject pressEButton;
+        private bool playerIsCollide;
 
         private void Update()
         {
-            if(pressEButton)
+            if (playerIsCollide)
             {
-                if(Input.GetKeyDown(KeyCode.E))
+                if (Input.GetKeyDown(KeyCode.E))
                 {
-                    Cursor.lockState = CursorLockMode.None;
-                    Cursor.visible = true;
-                    UnlockNewLevel();
-                    SceneManager.LoadScene(0);
-                   // 저장된 unlockedLevel 값 증가
-                   // 맵 선택 씬으로 넘어감
+                    PlayerPrefs.SetInt("UnlockedLevel", 1);
+                    PlayerPrefs.SetInt("ReachedIndex", 1);
+                    PlayerPrefs.Save();
+                    SceneManager.LoadScene(0);                    
                 }
             }
         }
@@ -40,17 +37,17 @@ namespace Project002
 
         private void OnTriggerEnter(Collider other)
         {
-            if(other.CompareTag("Player") && LevelOneEnemyManager.Instance.enemyCount <= 0)
+            if (other.CompareTag("Player"))
             {
                 print("Level Completed");
-                pressEButton.SetActive(true);               
+                playerIsCollide = true;
             }
         }
         private void OnTriggerExit(Collider other)
         {
-            if(other.CompareTag("Player"))
+            if (other.CompareTag("Player"))
             {
-                pressEButton.SetActive(false);
+                playerIsCollide = false;
             }
         }
     }
