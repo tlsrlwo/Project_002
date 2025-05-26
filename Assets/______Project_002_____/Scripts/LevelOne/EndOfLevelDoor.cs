@@ -16,8 +16,7 @@ namespace Project002
             {
                 if(Input.GetKeyDown(KeyCode.E))
                 {
-                    Cursor.lockState = CursorLockMode.None;
-                    Cursor.visible = true;
+                  
                     UnlockNewLevel();
                     SceneManager.LoadScene(0);
                    // 저장된 unlockedLevel 값 증가
