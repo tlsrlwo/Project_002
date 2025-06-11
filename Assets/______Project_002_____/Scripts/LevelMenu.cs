@@ -20,11 +20,11 @@ namespace Project002
 
             int unlockedLevels = PlayerPrefs.GetInt("UnlockedLevel", 1);    // 첫번째 레벨은 게임실행부터 잠금해제
 
-            for(int i = 0; i < buttons.Length; i++)     // 모든 레벨 버튼을 상호작용 불가로 설정한 뒤
+            for(int i = 0; i < buttons.Length; i++)                         // 모든 레벨 버튼을 상호작용 불가로 설정한 뒤
             {
-                buttons[i].interactable = false;
+                buttons[i].interactable = false; 
             }
-            for(int i = 0; i < unlockedLevels; i++)     // 해제 된 unlockedLevel 갯수만큼 상호작용 다시 허용
+            for(int i = 0; i < unlockedLevels; i++)                         // 해제 된 unlockedLevel 갯수만큼 상호작용 다시 허용
             {
                 buttons[i].interactable = true;
             }
