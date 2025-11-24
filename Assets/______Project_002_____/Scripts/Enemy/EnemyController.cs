@@ -124,19 +124,19 @@ namespace Project002
             // 다음 목적지까지의 거리가 0.2 보다 작으면 목적지(currentWayPoint) 증가, idle 상태로 전환
             if (agent.remainingDistance <= 0.2f)
             {
-                currentWayPoint++;
-                if (currentWayPoint >= wayPoints.childCount)
+                currentWayPoint++;                                      
+                if (currentWayPoint >= wayPoints.childCount)            // currentWayPoint 가 총 wayPoints 갯수보다 많으면 0 으로 초기화
                 {
                     currentWayPoint = 0;
                 }
-                currentState = AIState.Idle;
+                currentState = AIState.Idle;                            // idle 로 전환함으로써 그 자리에서 waitCounter 동안 두리번거리기
                 anim.SetBool("isWalking", false);
-                waitCounter = waitAtPoint;
+                waitCounter = waitAtPoint;                              
             }
-            if (distanceToPlayer <= chaseRange)
-            {
-                
-                currentState = AIState.Chasing;
+
+            if (distanceToPlayer <= chaseRange)                         // chaseRange 안으로 플레이어가 들어오면 쫓아가기
+            {                
+                currentState = AIState.Chasing;                         // chasing 으로 state전환
                 anim.SetBool("isWalking", true);
             }
         }
